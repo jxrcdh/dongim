@@ -20,3 +20,23 @@ share_ptr<message> message_control::char2msg(char* buf,unsigned length)
 	memcpy(reciveMsg->msg,buf+sizeof(reciveMsg->type)+sizeof(reciveMsg->msgLength),length-(sizeof(reciveMsg->type)+sizeof(reciveMsg->msgLength)));
 	return share_ptr<message>(reciveMsg);
 }
+int getLoginMsg(unsigned int id,char PassWord[],char Dest[],unsigned int len)
+{
+	unsigned int passlen = strlen(PassWord);
+	if((passlen+sizeof(id))>=len) return -1;
+	Dest[0]=id&0xFF;
+	Dest[1]=(id>>8)&0xFF;
+	Dest[2]=(id>>16)&0xFF;
+	Dest[3]=(id>>24)&0xFF;
+
+	strncpy(Dest+4,PassWord,passlen);
+	return passlen+4;
+}
+int getLoginInfo(char InfoStr[],unsigned int len,unsigned int& id,char password[],unsigned int passlen)
+{
+	if((passlen+sizeof(id))<=len) return -1;
+
+	id = (unsigned int)InfoStr[0]+((unsigned int)InfoStr[1]<<8)+((unsigned int)InfoStr[2]<<16)+((unsigned int)InfoStr[3]<<24);
+	strncpy(password,InfoStr+4,len-sizeof(id));
+	return 0;
+}
